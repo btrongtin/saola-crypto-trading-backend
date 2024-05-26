@@ -1,9 +1,13 @@
 import processTransaction from '../coreApis/processTransaction.js';
+import {
+  sendTransaction,
+  withdrawTransaction,
+} from '../schemas/transactions.js';
 
 export default async function (fastify, opts) {
   fastify.post(
     '/send',
-    { preValidation: [fastify.authenticate] },
+    { preValidation: [fastify.authenticate], schema: sendTransaction },
     async (request, reply) => {
       let transaction;
       try {
@@ -62,6 +66,10 @@ export default async function (fastify, opts) {
             success: true,
             message: 'Transaction completed successfully.',
           });
+        } else {
+          reply
+            .status(401)
+            .send({ success: false, message: 'Cannot perform this action.' });
         }
       } catch (error) {
         if (transaction) {
@@ -81,7 +89,7 @@ export default async function (fastify, opts) {
 
   fastify.post(
     '/withdraw',
-    { preValidation: [fastify.authenticate] },
+    { preValidation: [fastify.authenticate], schema: withdrawTransaction },
     async (request, reply) => {
       let transaction;
       try {
@@ -131,6 +139,10 @@ export default async function (fastify, opts) {
             success: true,
             message: 'Transaction completed successfully.',
           });
+        } else {
+          reply
+            .status(401)
+            .send({ success: false, message: 'Cannot perform this action.' });
         }
       } catch (error) {
         if (transaction) {
