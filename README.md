@@ -43,7 +43,7 @@ The application consists of two main services:
   git clone https://github.com/btrongtin/saola-crypto-trading-backend
   cd saola-crypto-trading-backend
   ```
-- Setup environment variables: put the `.env` file I shared with you via email to the root folder (please rename the file to `.env` if it was automatically renamed to `env` by Gmail).
+- Setup environment variables: put the `.env` file I shared with you via email to the root folder (**please rename the file to `.env` if it was automatically renamed to `env` by Gmail**).
 - Run the application with docker-compose:
   ```bash
   docker-compose up
