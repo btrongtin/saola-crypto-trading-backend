@@ -1,5 +1,5 @@
 import admin from 'firebase-admin';
-import serviceAccount from '../config/saola-crypto-trading-app-firebase-adminsdk-zcmlh-05b1b3bd31.json' with { type: "json" };
+import serviceAccount from './serviceAccount.js';
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),

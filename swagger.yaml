@@ -1,0 +1,531 @@
+openapi: 3.0.1
+info:
+  title: Crypto Trading API
+  description: API for managing user accounts and transactions in a crypto trading application.
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+    description: Local server
+tags:
+  - name: accounts
+    description: Operations to manage user accounts
+  - name: transactions
+    description: To send and withdraw money
+security:
+  - customAuth: []
+components:
+  securitySchemes:
+    customAuth:
+      type: apiKey
+      in: header
+      name: authToken
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The user ID
+          example: 6651d51debb976558724e1e5
+        email:
+          type: string
+          description: The user's email
+          example: btrongtin891@gmail.com
+        accounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Account'
+    Account:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The account ID
+          example: 6651d51debb976558724e1e6
+        type:
+          type: string
+          description: The type of account (e.g., credit, debit)
+          example: debit
+        balance:
+          type: number
+          description: The balance of the account
+          example: 100000
+        userId:
+          type: string
+          description: The ID of the user who owns the account
+          example: 6651d51debb976558724e1e5
+        transactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Transaction'
+    Transaction:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The transaction ID
+        amount:
+          type: number
+          description: The amount of the transaction
+          example: 100
+        timestamp:
+          type: string
+          format: date-time
+          description: The timestamp of the transaction
+          example: 2022-01-01T00:00:00.000Z
+        toAddress:
+          type: string
+          description: The recipient account ID
+          example: 6651d51debb976558724e1e7
+        currency:
+          type: string
+          description: The currency of the transaction
+          example: USD
+        status:
+          type: string
+          description: The status of the transaction
+          example: completed
+        type:
+          type: string
+          description: The type of transaction
+          example: send
+        accountId:
+          type: string
+          description: The sender account ID
+          example: 6651d51debb976558724e1e6
+paths:
+  /api/accounts/register:
+    post:
+      tags:
+        - accounts
+      summary: Register a new user
+      description: For simplicity, users add accounts list when registering.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+                accounts:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                      balance:
+                        type: number
+              example:
+                email: btrongtin89123@gmail.com
+                password: 123456
+                accounts:
+                  - type: credit
+                    balance: 10000
+                  - type: debit
+                    balance: 5000
+                  - type: loan
+                    balance: 6000
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                example:
+                  success: true
+                  message: User registered successfully
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                example:
+                  success: false
+                  message: Duplicate account type.
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                example:
+                  success: false
+                  message: Internal server error.
+      security: []
+  /api/accounts/login:
+    post:
+      tags:
+        - accounts
+      summary: Log in a user
+      description: After login, the user will be able to call other APIs with a valid access token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: btrongtin891@gmail.com
+                password:
+                  type: string
+                  example: 123456
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  accessToken:
+                    type: string
+                  refreshToken:
+                    type: string
+                example:
+                  success: true
+                  accessToken: eyJhbGciOiJSUzI1NiIsImtpZCI6IjNjOTNjMWEyNGNhZjgyN2I4ZGRlOWY4MmQyMzE1MzY1MDg4YWU2MTIiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vc2FvbGEtY3J5cHRvLXRyYWRpbmctYXBwIiwiYXVkIjoic2FvbGEtY3J5cHRvLXRyYWRpbmctYXBwIiwiYXV0aF90aW1lIjoxNzE2NzE1ODYyLCJ1c2VyX2lkIjoiaTJkMGU1YXFPYWM0aDdpdkhzMzRaYUFnZWtvMiIsInN1YiI6ImkyZDBlNWFxT2FjNGg3aXZIczM0WmFBZ2VrbzIiLCJpYXQiOjE3MTY3MTU4NjIsImV4cCI6MTcxNjcxOTQ2MiwiZW1haWwiOiJidHJvbmd0aW44OTFAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7ImVtYWlsIjpbImJ0cm9uZ3Rpbjg5MUBnbWFpbC5jb20iXX0sInNpZ25faW5fcHJvdmlkZXIiOiJwYXNzd29yZCJ9fQ.KUTF_pCN6jHs8f6_s5aEJxXI79Pkt7q3CjiFSeBhhUpcgDYU3L7rdsGc5MdGirF3jlFeI9KFaBg6xriCTiOLEMQWi9X1SgAwmKH48bSVZgIeyS09eZdzqk7Y-2i40aRODtvWMHXxwIe7KWeTWB02YWpCWhuAe01YzcLsRal_PsPBQN_DCX4egFJ4nMTcZ2exRzDHkxDR1SEWPXZHo1nkmCtdQXOOYh31tPG697slni62GXl0FVLKhdz98dRAWvWGp4-CyA1UbAZwmEy64nYf16l75bNez3gnPU0di88KsgUlwRdbQiMf9edfancYdRVtvSM9PVQu_Hdmmo_fr9Nvow
+                  refreshToken: AMf-vBwszj3ybRGvjN2OftrQLVk41F8h980rj2n14aYneD-7tmjAi2L-WnXHmitqnvttt2uLeermyFevHKzWd1GF2M7v-2KexHfEvoS8nlgVHVPP9uJBuqHLhX_10DI3m-xu1IqdFUh9X_-kaFiEVr2Oi6cLuYKRwNyPcw818On4NYz8WXX61I35URcXq5VwZ4C6fpqz9V33GYSrne-FuTys2yG-fkzH5cnhs6sHBFKbIHcMDm8NAuI
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                example:
+                  success: false
+                  message: INVALID_LOGIN_CREDENTIALS.
+      security: []
+  /api/accounts:
+    get:
+      tags:
+        - accounts
+      summary: Get all accounts of the logged-in user
+      security:
+        - customAuth: []
+      responses:
+        '200':
+          description: Successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Account'
+                example:
+                  success: true
+                  data:
+                    - id: 6651d51debb976558724e1e6
+                      type: credit
+                      balance: 99800
+                      userId: 6651d51debb976558724e1e5
+                    - id: 6651d51debb976558724e1e7
+                      type: debit
+                      balance: 50100
+                      userId: 6651d51debb976558724e1e8
+                    - id: 6651d51debb976558724e1e6
+                      type: loan
+                      balance: 60000
+                      userId: 6651d51debb976558724e1e5
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                example:
+                  success: false
+                  message: Invalid or expired token.
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                example:
+                  success: false
+                  message: Internal server error.
+  /api/accounts/{accountId}/transactions:
+    get:
+      tags:
+        - accounts
+      summary: Get all transactions for a specific account
+      security:
+        - customAuth: []
+      parameters:
+        - in: path
+          name: accountId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Transaction'
+                example:
+                  success: true
+                  data:
+                    - id: 6651f127b3edb6de97833886
+                      amount: 100
+                      timestamp: 2024-01-01T00:00:00.000Z
+                      toAddress: 6651d51debb976558724e1e7
+                      currency: USD
+                      status: completed
+                      type: send
+                      accountId: 6651d51debb976558724e1e6
+                    - id: 6651f69cb8fe5a1b4b6af9c1
+                      amount: 200
+                      timestamp: 2024-05-25T14:33:00.250Z
+                      toAddress: ''
+                      currency: USD
+                      status: completed
+                      type: withdraw
+                      accountId: 6651d51debb976558724e1e6
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                example:
+                  success: false
+                  message: Invalid or expired token.
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                example:
+                  success: false
+                  message: Internal server error.
+  /api/transactions/send:
+    post:
+      tags:
+        - transactions
+      summary: Send funds from one account to another
+      security:
+        - customAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount:
+                  type: number
+                toAddress:
+                  type: string
+                accountId:
+                  type: string
+                currency:
+                  type: string
+              example:
+                amount: 100
+                toAddress: 6651d51debb976558724e1e7
+                accountId: 6651d51debb976558724e1e6
+                currency: USD
+      responses:
+        '200':
+          description: Transaction created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                example:
+                  success: true
+                  message: Transaction completed successfully.
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                example:
+                  success: false
+                  message: Insufficient balance.
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                example:
+                  success: false
+                  message: Invalid or expired token.
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                example:
+                  success: false
+                  message: Internal server error.
+  /api/transactions/withdraw:
+    post:
+      tags:
+        - transactions
+      summary: Withdraw funds from an account
+      security:
+        - customAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount:
+                  type: number
+                accountId:
+                  type: string
+                currency:
+                  type: string
+              example:
+                amount: 100
+                accountId: 6651d51debb976558724e1e6
+                currency: USD
+      responses:
+        '200':
+          description: Transaction created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                example:
+                  success: true
+                  message: Transaction completed successfully.
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                example:
+                  success: false
+                  message: Insufficient balance.
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                example:
+                  success: false
+                  message: Invalid or expired token.
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                example:
+                  success: false
+                  message: Internal server error.
