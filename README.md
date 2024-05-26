@@ -40,10 +40,10 @@ The application consists of two main services:
 
 - Clone the repo to your local machine
   ```bash
-  git clone https://github.com/your-repo/crypto-trading-backend.git
-  cd crypto-trading-backend
+  git clone https://github.com/btrongtin/saola-crypto-trading-backend
+  cd saola-crypto-trading-backend
   ```
-- Setup environment variables: put the `.env` file I shared with you via email to the root folder
+- Setup environment variables: put the `.env` file I shared with you via email to the root folder (please rename the file to `.env` if it was automatically renamed to `env` by Gmail).
 - Run the application with docker-compose:
   ```bash
   docker-compose up
