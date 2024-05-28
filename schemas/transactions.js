@@ -12,9 +12,9 @@ const sendTransaction = {
   headers: {
     type: 'object',
     properties: {
-      authToken: { type: 'string' },
+      authorization: { type: 'string' },
     },
-    required: ['authToken'],
+    required: ['authorization'],
   },
   response: {
     200: {
@@ -40,9 +40,9 @@ const withdrawTransaction = {
   headers: {
     type: 'object',
     properties: {
-      authToken: { type: 'string' },
+      authorization: { type: 'string' },
     },
-    required: ['authToken'],
+    required: ['authorization'],
   },
   response: {
     200: {
