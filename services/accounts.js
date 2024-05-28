@@ -6,6 +6,8 @@ import {
   loginUser,
   registerUser,
 } from '../schemas/accounts.js';
+import validatePaginationAndSorting from './utils/validatePaginationAndSorting.js';
+import { CACHE_TTL } from '../constant.js';
 export default async function (fastify, opts) {
   fastify.post(
     '/register',
@@ -77,11 +79,27 @@ export default async function (fastify, opts) {
     '/',
     { preValidation: [fastify.authenticate], schema: getUserAccounts },
     async (request, reply) => {
+      const { limit, skip, sortBy, order } = validatePaginationAndSorting(
+        request.query
+      );
+      const cacheKey = `user_accounts_${request.user.email}_${limit}_${skip}_${sortBy}_${order}`;
+      const cachedData = fastify.cache.get(cacheKey);
+      if (cachedData) {
+        return reply.send({ success: true, data: cachedData });
+      }
       try {
         const user = await fastify.prisma.user.findUnique({
           where: { email: request.user.email },
-          include: { accounts: true },
+          include: {
+            accounts: {
+              orderBy: { [sortBy]: order },
+              skip,
+              take: limit,
+            },
+          },
         });
+        // Set cache
+        fastify.cache.set(cacheKey, user.accounts, CACHE_TTL);
         reply.send({ success: true, data: user.accounts });
       } catch (error) {
         reply
@@ -94,12 +112,18 @@ export default async function (fastify, opts) {
     '/:accountId/transactions',
     { preValidation: [fastify.authenticate], schema: getAccountTransactions },
     async (request, reply) => {
+      const { limit, skip, sortBy, order } = validatePaginationAndSorting(
+        request.query
+      );
       try {
         const { accountId } = request.params;
         const transactions = await fastify.prisma.transaction.findMany({
           where: {
             OR: [{ accountId: accountId }, { toAddress: accountId }],
           },
+          orderBy: { [sortBy]: order },
+          skip,
+          take: limit,
         });
         reply.send({ success: true, data: transactions });
       } catch (error) {

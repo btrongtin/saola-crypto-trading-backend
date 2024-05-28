@@ -1,6 +1,7 @@
 import Fastify from 'fastify';
 import dotenv from 'dotenv';
 import authPlugin from './plugins/auth.js';
+import cachePlugin from './plugins/cache.js';
 import prismaPlugin from './plugins/prisma.js';
 import accountsService from './services/accounts.js';
 import transactionsService from './services/transactions.js';
@@ -44,6 +45,7 @@ fastify.register(cors);
 
 // Register plugins
 fastify.register(authPlugin);
+fastify.register(cachePlugin);
 fastify.register(prismaPlugin);
 
 // Register services

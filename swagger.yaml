@@ -12,13 +12,13 @@ tags:
   - name: transactions
     description: To send and withdraw money
 security:
-  - customAuth: []
+  - bearerAuth: []
 components:
   securitySchemes:
-    customAuth:
-      type: apiKey
-      in: header
-      name: authToken
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     User:
       type: object
@@ -232,7 +232,27 @@ paths:
         - accounts
       summary: Get all accounts of the logged-in user
       security:
-        - customAuth: []
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: limit
+          description: Limit the number of accounts returned
+          required: false
+          explode: true
+          schema:
+            type: string
+            default: 20
+            enum:
+              - 1
+              - 10
+              - 20
+        - in: query
+          name: skip
+          description: Skip the number of accounts returned
+          required: false
+          explode: true
+          schema:
+            type: string
       responses:
         '200':
           description: Successful
@@ -296,11 +316,30 @@ paths:
         - accounts
       summary: Get all transactions for a specific account
       security:
-        - customAuth: []
+        - bearerAuth: []
       parameters:
         - in: path
           name: accountId
           required: true
+          schema:
+            type: string
+        - in: query
+          name: limit
+          description: Limit the number of accounts returned
+          required: false
+          explode: true
+          schema:
+            type: string
+            default: 20
+            enum:
+              - 1
+              - 10
+              - 20
+        - in: query
+          name: skip
+          description: Skip the number of accounts returned
+          required: false
+          explode: true
           schema:
             type: string
       responses:
@@ -370,7 +409,7 @@ paths:
         - transactions
       summary: Send funds from one account to another
       security:
-        - customAuth: []
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -454,7 +493,7 @@ paths:
         - transactions
       summary: Withdraw funds from an account
       security:
-        - customAuth: []
+        - bearerAuth: []
       requestBody:
         required: true
         content:
