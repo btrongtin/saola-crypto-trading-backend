@@ -5,6 +5,7 @@ This repository contains two backend services: Account Manager and Transaction M
 ## Table of Contents
 
 - [Project Overview](#project-overview)
+- [Key Features](#key-features)
 - [Architecture](#architecture)
 - [Running the Application](#running-the-application)
 - [API Documentation](#api-documentation)
@@ -153,18 +154,18 @@ The application consists of two main services:
 
 ## Running the application
 
-### Step 1: Clone the Repository
+#### Step 1: Clone the Repository
 
 ```bash
 git clone https://github.com/btrongtin/saola-crypto-trading-backend
 cd saola-crypto-trading-backend
 ```
 
-### Step 2: Set Up Environment Variables:
+#### Step 2: Set Up Environment Variables:
 
 Put the `.env` file I shared with you via email to the root folder (**please rename the file to `.env` if it was automatically renamed to `env` by Gmail**).
 
-### Step 3: Run the Application with Docker Compose
+#### Step 3: Run the Application with Docker Compose
 
 Navigate to the root directory of the cloned repository and run the following command:
 
