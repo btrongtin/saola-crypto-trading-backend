@@ -230,7 +230,7 @@ paths:
     get:
       tags:
         - accounts
-      summary: Get all accounts of the logged-in user
+      summary: Get all accounts of the logged-in user. The data is cached for 1 minute.
       security:
         - bearerAuth: []
       parameters:
@@ -240,7 +240,7 @@ paths:
           required: false
           explode: true
           schema:
-            type: string
+            type: number
             default: 20
             enum:
               - 1
@@ -252,7 +252,7 @@ paths:
           required: false
           explode: true
           schema:
-            type: string
+            type: number
       responses:
         '200':
           description: Successful
@@ -329,7 +329,7 @@ paths:
           required: false
           explode: true
           schema:
-            type: string
+            type: number
             default: 20
             enum:
               - 1
@@ -341,7 +341,7 @@ paths:
           required: false
           explode: true
           schema:
-            type: string
+            type: number
       responses:
         '200':
           description: Successful

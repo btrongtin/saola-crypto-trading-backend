@@ -1,4 +1,7 @@
-const registerUser = {
+import { FastifySchema } from 'fastify';
+
+// Schema for user registration
+const registerUser: FastifySchema = {
   body: {
     type: 'object',
     properties: {
@@ -29,7 +32,8 @@ const registerUser = {
   },
 };
 
-const loginUser = {
+// Schema for user login
+const loginUser: FastifySchema = {
   body: {
     type: 'object',
     properties: {
@@ -50,7 +54,8 @@ const loginUser = {
   },
 };
 
-const getUserAccounts = {
+// Schema for getting user accounts
+const getUserAccounts: FastifySchema = {
   headers: {
     type: 'object',
     properties: {
@@ -80,7 +85,8 @@ const getUserAccounts = {
   },
 };
 
-const getAccountTransactions = {
+// Schema for getting transactions of a specific account
+const getAccountTransactions: FastifySchema = {
   headers: {
     type: 'object',
     properties: {
@@ -121,4 +127,5 @@ const getAccountTransactions = {
   },
 };
 
+// Export schemas for use in route definitions
 export { registerUser, loginUser, getUserAccounts, getAccountTransactions };
