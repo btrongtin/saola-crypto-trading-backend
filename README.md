@@ -63,6 +63,7 @@ The application consists of two main services:
 
      ```mermaid
       sequenceDiagram
+      autonumber
       participant Client
       participant FastifyServer
       participant Database
@@ -108,6 +109,7 @@ The application consists of two main services:
      
      ```mermaid
       sequenceDiagram
+          autonumber
           participant Client
           participant FastifyServer
           participant Database
