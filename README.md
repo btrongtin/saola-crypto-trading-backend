@@ -44,9 +44,10 @@ The application consists of two main services:
    - Manages user registration, login, and account information.
    - Routes:
      - [POST] `/api/accounts/register`: Register a new user with accounts.
-     - [POST] `/api/accounts/login`: Login a user.
-     - [GET] `/api/accounts`: Get all accounts of the logged-in user (requires authentication).
-     - [GET] `/api/accounts/:accountId/transactions`: Get transactions for a specific account (requires authentication).
+     - [POST] `/api/accounts/login`: Login a user, after login, client will receive an `access token` and a `refresh token`.
+     - [GET] `/api/accounts`: Get all accounts of the logged-in user (requires authentication), client can pass the `skip` and `limit` query for pagination.
+     - [GET] `/api/accounts/:accountId/transactions`: Get transactions for a specific account (requires authentication), client can pass the `skip` and `limit` query for pagination.
+    ***Note: see [API Documentation](#api-documentation) for details API documentation***
 
 2. **Transaction Manager Service**:
    - Manages sending and withdrawing funds between accounts.

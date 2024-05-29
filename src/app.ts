@@ -17,8 +17,8 @@ const fastify: FastifyInstance = Fastify({
   logger: true,
 });
 
+// Prepare for swagger specification
 const __filename = fileURLToPath(import.meta.url);
-
 const __dirname = path.dirname(__filename);
 
 // Register swagger
