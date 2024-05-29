@@ -36,20 +36,19 @@ This repository contains two backend services: Account Manager and Transaction M
   Swagger Integration
 - I integrated Swagger for API documentation, providing a clear and interactive interface for developers to understand and interact with the API endpoints.
 
-## Teck Stack
+## Tech Stack
 
-    - Backend
-        - Node.js: The core runtime environment powering the backend, known for its performance and scalability.
-        - Fastify: A high-performance web framework for Node.js, chosen for its speed and low overhead.
-        - Firebase: Used for authentication.
-        - Prisma: An ORM (Object-Relational Mapping) tool for efficient database management and querying.
-        - TypeScript: Enhances JavaScript with static typing, improving code quality and maintainability.
-
-    - Development tools
-        - Docker: The application is containerized using Docker, ensuring consistent environments across development, testing, and production.
-        - TSX: Used to run TypeScript files directly, supporting hot-reloading for a smoother development experience.
-    - Documentation
-        - Swagger: The app uses Swagger for API documentation, providing a clear and interactive interface for developers to understand and interact with the API endpoints.
+- Backend
+    - Node.js: The core runtime environment powering the backend, known for its performance and scalability.
+    - Fastify: A high-performance web framework for Node.js, chosen for its speed and low overhead.
+    - Firebase: Used for authentication.
+    - Prisma: An ORM (Object-Relational Mapping) tool for efficient database management and querying.
+    - TypeScript: Enhances JavaScript with static typing, improving code quality and maintainability.
+- Development tools
+    - Docker: The application is containerized using Docker, ensuring consistent environments across development, testing, and production.
+    - TSX: Used to run TypeScript files directly, supporting hot-reloading for a smoother development experience.
+- Documentation
+    - Swagger: The app uses Swagger for API documentation, providing a clear and interactive interface for developers to understand and interact with the API endpoints.
 ## Architecture
 
 The application consists of two main services:
