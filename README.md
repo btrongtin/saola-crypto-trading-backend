@@ -4,40 +4,31 @@ This repository contains two backend services: Account Manager and Transaction M
 
 ## Table of Contents
 
-- [Project Overview](#project-overview)
 - [Key Features](#key-features)
 - [Architecture](#architecture)
 - [Running the Application](#running-the-application)
 - [API Documentation](#api-documentation)
 
-## Project Overview
-
-The application provides the following features:
-
-- **User Registration and Login**: Users can register and log in to the system.
-- **Account Management**: Each user can have multiple accounts (e.g., credit, debit, loan).
-- **Transaction Management**: Users can send and withdraw funds, with all transactions being recorded.
-
 ## Key Features
 
-User Authentication and Registration
+**User Authentication and Registration**
 
 - Users can register with their email and password, with credentials securely managed using Firebase Authentication.
 - After logging in, clients receive an Access Token, which they must use to call other APIs.
 
-Account Management
+**Account Management**
 
 - Users can have multiple accounts (e.g., credit, debit, loan). For the scope of this assignment, users must submit a list of accounts in the request body during registration.
 - Users can retrieve all their accounts (requires access token). I have implemented caching to reduce database queries; user account data will be cached for 1 minute.
 - Users can get all transactions for specific accounts (requires access token).
 
-Transactions
+**Transactions**
 
 - Transactions are processed by a simulated API. I use Prisma transactions to ensure data consistency.
 - Users can send money from one account to another.
 - Users can withdraw money from an account.
 
-Data validation
+**Data validation**
 
 - I use Fastify's schema validation to ensure that all API requests and responses adhere to predefined formats.
 - The schemas validate request bodies, query parameters, headers, and responses to cover all aspects of API communication.
