@@ -5,6 +5,7 @@ This repository contains two backend services: Account Manager and Transaction M
 ## Table of Contents
 
 - [Key Features](#key-features)
+- [Tech Stack](#tech-stack)
 - [Architecture](#architecture)
 - [Running the Application](#running-the-application)
 - [API Documentation](#api-documentation)
@@ -35,6 +36,20 @@ This repository contains two backend services: Account Manager and Transaction M
   Swagger Integration
 - I integrated Swagger for API documentation, providing a clear and interactive interface for developers to understand and interact with the API endpoints.
 
+## Teck Stack
+
+    - Backend
+        - Node.js: The core runtime environment powering the backend, known for its performance and scalability.
+        - Fastify: A high-performance web framework for Node.js, chosen for its speed and low overhead.
+        - Firebase: Used for authentication.
+        - Prisma: An ORM (Object-Relational Mapping) tool for efficient database management and querying.
+        - TypeScript: Enhances JavaScript with static typing, improving code quality and maintainability.
+
+    - Development tools
+        - Docker: The application is containerized using Docker, ensuring consistent environments across development, testing, and production.
+        - TSX: Used to run TypeScript files directly, supporting hot-reloading for a smoother development experience.
+    - Documentation
+        - Swagger: The app uses Swagger for API documentation, providing a clear and interactive interface for developers to understand and interact with the API endpoints.
 ## Architecture
 
 The application consists of two main services:
@@ -173,3 +188,5 @@ API documentation is provided using Swagger. Once the application is running, yo
 ```bash
     http://localhost:3000/docs
 ```
+
+![swagger demo](https://github.com/btrongtin/saola-crypto-trading-backend/blob/main/swagger-demo.png?raw=true)
