@@ -47,7 +47,8 @@ The application consists of two main services:
      - [POST] `/api/accounts/login`: Login a user, after login, client will receive an `access token` and a `refresh token`.
      - [GET] `/api/accounts`: Get all accounts of the logged-in user (requires authentication), client can pass the `skip` and `limit` query for pagination.
      - [GET] `/api/accounts/:accountId/transactions`: Get transactions for a specific account (requires authentication), client can pass the `skip` and `limit` query for pagination.
-    ***Note: see [API Documentation](#api-documentation) for details API documentation***
+
+***Note: see [API Documentation](#api-documentation) for details API documentation***
 
 2. **Transaction Manager Service**:
    - Manages sending and withdrawing funds between accounts.
