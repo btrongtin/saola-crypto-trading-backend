@@ -31,11 +31,7 @@ export default async function accountsService(
       let user;
       try {
         // Destructure request body to extract user details
-        const { email, password, accounts } = request.body as {
-          email: string;
-          password: string;
-          accounts: { type: string; balance?: number }[];
-        };
+        const { email, password, accounts } = request.body;
 
         // Prepare accounts list
         const accountsList = accounts
@@ -88,10 +84,7 @@ export default async function accountsService(
     async function (request, reply) {
       try {
         // Destructure request body to extract user details
-        const { email, password } = request.body as {
-          email: string;
-          password: string;
-        };
+        const { email, password } = request.body;
 
         // Authenticate user with Firebase
         const response = await axios.post(
