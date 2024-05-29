@@ -8,6 +8,8 @@ RUN npm install
 
 COPY . .
 
+WORKDIR /app/src
+
 RUN npx prisma generate
 
 EXPOSE 3000

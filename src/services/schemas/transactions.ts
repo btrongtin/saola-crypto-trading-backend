@@ -1,4 +1,7 @@
-const sendTransaction = {
+import { FastifySchema } from 'fastify';
+
+// Schema for sending a transaction
+const sendTransaction: FastifySchema = {
   body: {
     type: 'object',
     properties: {
@@ -7,14 +10,14 @@ const sendTransaction = {
       accountId: { type: 'string' },
       currency: { type: 'string' },
     },
-    required: ['amount', 'toAddress', 'accountId', 'currency'],
+    required: ['amount', 'toAddress', 'accountId', 'currency'], // Required fields for sending a transaction
   },
   headers: {
     type: 'object',
     properties: {
-      authorization: { type: 'string' },
+      authorization: { type: 'string' }, // Authorization header with the token
     },
-    required: ['authorization'],
+    required: ['authorization'], // Authorization header is required
   },
   response: {
     200: {
@@ -27,15 +30,16 @@ const sendTransaction = {
   },
 };
 
-const withdrawTransaction = {
+// Schema for withdrawing a transaction
+const withdrawTransaction: FastifySchema = {
   body: {
     type: 'object',
     properties: {
-      amount: { type: 'number', minimum: 0.01 },
-      accountId: { type: 'string' },
+      amount: { type: 'number', minimum: 0.01 }, // Amount to withdraw, must be at least 0.01
+      accountId: { type: 'string' }, // Account ID from which to withdraw
       currency: { type: 'string' },
     },
-    required: ['amount', 'accountId', 'currency'],
+    required: ['amount', 'accountId', 'currency'], // Required fields for withdrawing a transaction
   },
   headers: {
     type: 'object',
@@ -55,4 +59,5 @@ const withdrawTransaction = {
   },
 };
 
+// Export schemas for use in route definitions
 export { sendTransaction, withdrawTransaction };

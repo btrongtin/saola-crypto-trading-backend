@@ -1,10 +1,10 @@
-import Fastify from 'fastify';
+import Fastify, { FastifyInstance } from 'fastify';
 import dotenv from 'dotenv';
-import authPlugin from './plugins/auth.js';
-import cachePlugin from './plugins/cache.js';
-import prismaPlugin from './plugins/prisma.js';
-import accountsService from './services/accounts.js';
-import transactionsService from './services/transactions.js';
+import authPlugin from './plugins/auth';
+import cachePlugin from './plugins/cache';
+import prismaPlugin from './plugins/prisma';
+import accountsService from './services/accounts';
+import transactionsService from './services/transactions';
 import cors from '@fastify/cors';
 import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUi from '@fastify/swagger-ui';
@@ -13,7 +13,7 @@ import { fileURLToPath } from 'url';
 
 dotenv.config();
 
-const fastify = Fastify({
+const fastify: FastifyInstance = Fastify({
   logger: true,
 });
 
@@ -21,15 +21,14 @@ const __filename = fileURLToPath(import.meta.url);
 
 const __dirname = path.dirname(__filename);
 
+// Register swagger
 fastify.register(fastifySwagger, {
   mode: 'static',
   specification: {
-    path: './swagger.yaml',
+    path: path.join(__dirname, 'swagger.yaml'),
     baseDir: __dirname,
   },
-  exposeRoute: true,
 });
-
 fastify.register(fastifySwaggerUi, {
   routePrefix: '/docs',
   staticCSP: true,
@@ -38,7 +37,6 @@ fastify.register(fastifySwaggerUi, {
     return swaggerObject;
   },
   transformSpecificationClone: true,
-  servers: [{ url: 'http://localhost:3000', description: 'Local server' }],
 });
 
 fastify.register(cors);
@@ -51,6 +49,7 @@ fastify.register(prismaPlugin);
 // Register services
 fastify.register(accountsService, { prefix: 'api/accounts' });
 fastify.register(transactionsService, { prefix: 'api/transactions' });
+
 const start = async () => {
   try {
     await fastify.listen({ port: 3000, host: '0.0.0.0' });
@@ -59,4 +58,5 @@ const start = async () => {
     process.exit(1);
   }
 };
+
 start();
