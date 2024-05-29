@@ -47,111 +47,107 @@ Data validation
 
 The application consists of two main services:
 
-1.  **Account Manager Service**:
+1. **Account Manager Service**:
 
-    - Manages user registration, login, and account information.
-    - Routes:
-      - [POST] `/api/accounts/register`: Register a new user with accounts.
-      - [POST] `/api/accounts/login`: Login a user.
-      - [GET] `/api/accounts`: Get all accounts of the logged-in user (requires authentication).
-      - [GET] `/api/accounts/:accountId/transactions`: Get transactions for a specific account (requires authentication).
+   - Manages user registration, login, and account information.
+   - Routes:
+     - [POST] `/api/accounts/register`: Register a new user with accounts.
+     - [POST] `/api/accounts/login`: Login a user.
+     - [GET] `/api/accounts`: Get all accounts of the logged-in user (requires authentication).
+     - [GET] `/api/accounts/:accountId/transactions`: Get transactions for a specific account (requires authentication).
 
-2.  **Transaction Manager Service**:
+2. **Transaction Manager Service**:
+   - Manages sending and withdrawing funds between accounts.
+   - Routes:
+     - [POST] `/api/transactions/send`: Send funds to another account (requires authentication).
 
-    - Manages sending and withdrawing funds between accounts.
-    - Routes:
-      - [POST] `/api/transactions/send`: Send funds to another account (requires authentication).
-      ```mermaid
+     ```mermaid
       sequenceDiagram
-      autonumber
       participant Client
       participant FastifyServer
       participant Database
       participant SimulatedAPI
 
-      ```
+      Client->>FastifyServer: POST /send
+      FastifyServer->>Database: Retrieve user with email and accounts
+      Database-->>FastifyServer: User and accounts data
 
-    Client->>FastifyServer: POST /send
-    FastifyServer->>Database: Retrieve user with email and accounts
-    Database-->>FastifyServer: User and accounts data
+      alt Account not found or does not belong to user
+          FastifyServer-->>Client: 401 Cannot perform this action
+      else Account found
+          alt Insufficient balance
+              FastifyServer-->>Client: 400 Insufficient balance
+          else Sufficient balance
+              FastifyServer->>Database: Create transaction with status 'pending'
+              Database-->>FastifyServer: Transaction data
 
-    alt Account not found or does not belong to user
-    FastifyServer-->>Client: 401 Cannot perform this action
-    else Account found
-    alt Insufficient balance
-    FastifyServer-->>Client: 400 Insufficient balance
-    else Sufficient balance
-    FastifyServer->>Database: Create transaction with status 'pending'
-    Database-->>FastifyServer: Transaction data
+              FastifyServer->>SimulatedAPI: Process transaction
+              SimulatedAPI-->>FastifyServer: Transaction processed
 
-             FastifyServer->>SimulatedAPI: Process transaction
-             SimulatedAPI-->>FastifyServer: Transaction processed
+              FastifyServer->>Database: Begin transaction
+              par Update sender account balance
+                  FastifyServer->>Database: Decrement sender balance
+              and Update receiver account balance
+                  FastifyServer->>Database: Increment receiver balance
+              and Update transaction status
+                  FastifyServer->>Database: Update transaction to 'completed'
+              end
+              Database-->>FastifyServer: Transaction updates
 
-             FastifyServer->>Database: Begin transaction
-             par Update sender account balance
-                 FastifyServer->>Database: Decrement sender balance
-             and Update receiver account balance
-                 FastifyServer->>Database: Increment receiver balance
-             and Update transaction status
-                 FastifyServer->>Database: Update transaction to 'completed'
-             end
-             Database-->>FastifyServer: Transaction updates
+              FastifyServer-->>Client: 200 Transaction completed successfully
+          end
+      end
 
-             FastifyServer-->>Client: 200 Transaction completed successfully
-         end
+      alt Error occurs
+          FastifyServer->>Database: Update transaction to 'cancelled'
+          Database-->>FastifyServer: Transaction status updated
+          FastifyServer-->>Client: 500 Internal server error
+      end
+     ```
+     - [POST] `/api/transactions/withdraw`: Withdraw funds from an account (requires authentication).
+     
+     ```mermaid
+      sequenceDiagram
+          participant Client
+          participant FastifyServer
+          participant Database
+          participant SimulatedAPI
 
-    end
+          Client->>FastifyServer: POST /withdraw
+          FastifyServer->>Database: Retrieve user with email and accounts
+          Database-->>FastifyServer: User and accounts data
 
-    alt Error occurs
-    FastifyServer->>Database: Update transaction to 'cancelled'
-    Database-->>FastifyServer: Transaction status updated
-    FastifyServer-->>Client: 500 Internal server error
-    end
+          alt Account not found or does not belong to user
+              FastifyServer-->>Client: 401 Cannot perform this action
+          else Account found
+              alt Insufficient balance
+                  FastifyServer-->>Client: 400 Insufficient balance
+              else Sufficient balance
+                  FastifyServer->>Database: Create transaction with status 'pending'
+                  Database-->>FastifyServer: Transaction data
 
-    ````
-    - [POST] `/api/transactions/withdraw`: Withdraw funds from an account (requires authentication).
-    ```mermaid
-    sequenceDiagram
-    participant Client
-    participant FastifyServer
-    participant Database
-    participant SimulatedAPI
+                  FastifyServer->>SimulatedAPI: Process transaction
+                  SimulatedAPI-->>FastifyServer: Transaction processed
 
-    Client->>FastifyServer: POST /withdraw
-    FastifyServer->>Database: Retrieve user with email and accounts
-    Database-->>FastifyServer: User and accounts data
+                  FastifyServer->>Database: Begin transaction
+                  par Update sender account balance
+                      FastifyServer->>Database: Decrement sender balance
+                  and Update transaction status
+                      FastifyServer->>Database: Update transaction to 'completed'
+                  end
+                  Database-->>FastifyServer: Transaction updates
 
-    alt Account not found or does not belong to user
-       FastifyServer-->>Client: 401 Cannot perform this action
-    else Account found
-       alt Insufficient balance
-           FastifyServer-->>Client: 400 Insufficient balance
-       else Sufficient balance
-           FastifyServer->>Database: Create transaction with status 'pending'
-           Database-->>FastifyServer: Transaction data
+                  FastifyServer-->>Client: 200 Transaction completed successfully
+              end
+          end
 
-           FastifyServer->>SimulatedAPI: Process transaction
-           SimulatedAPI-->>FastifyServer: Transaction processed
+          alt Error occurs
+              FastifyServer->>Database: Update transaction to 'cancelled'
+              Database-->>FastifyServer: Transaction status updated
+              FastifyServer-->>Client: 500 Internal server error
+          end
 
-           FastifyServer->>Database: Begin transaction
-           par Update sender account balance
-               FastifyServer->>Database: Decrement sender balance
-           and Update transaction status
-               FastifyServer->>Database: Update transaction to 'completed'
-           end
-           Database-->>FastifyServer: Transaction updates
-
-           FastifyServer-->>Client: 200 Transaction completed successfully
-       end
-    end
-
-    alt Error occurs
-       FastifyServer->>Database: Update transaction to 'cancelled'
-       Database-->>FastifyServer: Transaction status updated
-       FastifyServer-->>Client: 500 Internal server error
-    end
-
-    ````
+     ```
 
 ## Running the application
 
