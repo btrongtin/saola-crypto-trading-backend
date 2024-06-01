@@ -8,9 +8,10 @@ datasource db {
 }
 
 model User {
-    id       String    @id @default(auto()) @map("_id") @db.ObjectId
-    email    String    @unique
-    accounts Account[]
+    id        String    @id @default(auto()) @map("_id") @db.ObjectId
+    email     String    @unique
+    createdAt DateTime  @default(now())
+    accounts  Account[]
 }
 
 model Account {
