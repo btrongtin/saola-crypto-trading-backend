@@ -2,16 +2,10 @@ import processTransaction from '../coreApis/processTransaction';
 import { sendTransaction, withdrawTransaction } from './schemas/transactions';
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { RouteShorthandOptions } from 'fastify/types/route';
-import {
-  ISendTransactionRequestBody,
-  IWithdrawTransactionRequestBody,
-} from './types/transaction.types';
+import { ISendTransactionRequestBody, IWithdrawTransactionRequestBody } from './types/transaction.types';
 import { IAccount } from './types/account.types';
 
-export default async function transactionsService(
-  fastify: FastifyInstance,
-  opts: FastifyPluginOptions
-) {
+export default async function transactionsService(fastify: FastifyInstance, opts: FastifyPluginOptions) {
   // Send transaction route
   fastify.post<{ Body: ISendTransactionRequestBody }>(
     '/send',
@@ -37,16 +31,12 @@ export default async function transactionsService(
         });
 
         // Check if the sender account is belonging to the logged-in user
-        const account = user?.accounts.find(
-          (account: IAccount) => account.id === accountId
-        );
+        const account = user?.accounts.find((account: IAccount) => account.id === accountId);
 
         // If the account is found, check for sufficient balance
         if (account) {
           if (account.balance < amount) {
-            return reply
-              .status(400)
-              .send({ success: false, message: 'Insufficient balance.' });
+            return reply.status(400).send({ success: false, message: 'Insufficient balance.' });
           }
 
           // Create a new transaction with status 'pending'
@@ -96,9 +86,7 @@ export default async function transactionsService(
           });
         } else {
           // If the account is not found or it does not belong to the logged-in user, send an error response
-          reply
-            .status(401)
-            .send({ success: false, message: 'Cannot perform this action.' });
+          reply.status(401).send({ success: false, message: 'Cannot perform this action.' });
         }
       } catch (error) {
         // Rollback the transaction if an error occurs
@@ -110,11 +98,9 @@ export default async function transactionsService(
             });
           } catch (updateTransactionError) {}
         }
-        reply
-          .status(500)
-          .send({ success: false, message: 'Internal server error' });
+        reply.status(500).send({ success: false, message: 'Internal server error' });
       }
-    }
+    },
   );
 
   // Withdraw transaction route
@@ -140,17 +126,13 @@ export default async function transactionsService(
         });
 
         // Check if the requested account is belonging to the logged-in user
-        const account = user?.accounts.find(
-          (account: IAccount) => account.id === accountId
-        );
+        const account = user?.accounts.find((account: IAccount) => account.id === accountId);
 
         // If the account is found, check for sufficient balance
         if (account) {
           // Check for sufficient balance
           if (account.balance < amount) {
-            return reply
-              .status(400)
-              .send({ success: false, message: 'Insufficient balance.' });
+            return reply.status(400).send({ success: false, message: 'Insufficient balance.' });
           }
 
           // Create a new transaction with status 'pending'
@@ -191,9 +173,7 @@ export default async function transactionsService(
           });
         } else {
           // If the account is not found or it does not belong to the logged-in user, send an error response
-          reply
-            .status(401)
-            .send({ success: false, message: 'Cannot perform this action.' });
+          reply.status(401).send({ success: false, message: 'Cannot perform this action.' });
         }
       } catch (error) {
         // Rollback the transaction if an error occurs
@@ -205,10 +185,8 @@ export default async function transactionsService(
             });
           } catch (updateTransactionError) {}
         }
-        reply
-          .status(500)
-          .send({ success: false, message: 'Internal server error' });
+        reply.status(500).send({ success: false, message: 'Internal server error' });
       }
-    }
+    },
   );
 }

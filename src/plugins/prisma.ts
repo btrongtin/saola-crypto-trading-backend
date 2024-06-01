@@ -18,12 +18,10 @@ const prismaPlugin: FastifyPluginAsync = async (fastify, options) => {
   await prisma.$connect();
 
   // Decorate the Fastify instance with the Prisma client
-  fastify
-    .decorate('prisma', prisma)
-    .addHook('onClose', async (fastifyInstance) => {
-      // Disconnect the Prisma client when Fastify shuts down
-      await fastifyInstance.prisma.$disconnect();
-    });
+  fastify.decorate('prisma', prisma).addHook('onClose', async (fastifyInstance) => {
+    // Disconnect the Prisma client when Fastify shuts down
+    await fastifyInstance.prisma.$disconnect();
+  });
 };
 
 export default fastifyPlugin(prismaPlugin);

@@ -1,11 +1,6 @@
 import axios from 'axios';
 import firebase from '../firebase/index';
-import {
-  getAccountTransactions,
-  getUserAccounts,
-  loginUser,
-  registerUser,
-} from './schemas/accounts';
+import { getAccountTransactions, getUserAccounts, loginUser, registerUser } from './schemas/accounts';
 import validatePaginationAndSorting from './utils/validatePaginationAndSorting';
 import { CACHE_TTL } from '../constant';
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
@@ -19,10 +14,7 @@ declare module 'fastify' {
   }
 }
 
-export default async function accountsService(
-  fastify: FastifyInstance,
-  opts: FastifyPluginOptions
-) {
+export default async function accountsService(fastify: FastifyInstance, opts: FastifyPluginOptions) {
   // Register a new user
   fastify.post<{ Body: IRegisterRequestBody }>(
     '/register',
@@ -54,9 +46,7 @@ export default async function accountsService(
           },
         });
 
-        reply
-          .status(201)
-          .send({ success: true, message: 'Register successfully.' });
+        reply.status(201).send({ success: true, message: 'Register successfully.' });
       } catch (error) {
         if (user) {
           try {
@@ -66,15 +56,11 @@ export default async function accountsService(
         }
         // Error code P2002 from Prisma: Duplicate account type
         if ((error as any).code === 'P2002') {
-          return reply
-            .status(400)
-            .send({ success: false, message: 'Duplicate account type.' });
+          return reply.status(400).send({ success: false, message: 'Duplicate account type.' });
         }
-        reply
-          .status(400)
-          .send({ success: false, message: (error as Error).message });
+        reply.status(400).send({ success: false, message: (error as Error).message });
       }
-    }
+    },
   );
 
   // User login
@@ -93,7 +79,7 @@ export default async function accountsService(
             email,
             password,
             returnSecureToken: true,
-          }
+          },
         );
         // Get access token and refresh token to send back to client
         const { idToken, refreshToken } = response.data;
@@ -101,12 +87,10 @@ export default async function accountsService(
       } catch (error) {
         reply.status(400).send({
           success: false,
-          message:
-            (error as any).response?.data?.error?.message ||
-            (error as Error).message,
+          message: (error as any).response?.data?.error?.message || (error as Error).message,
         });
       }
-    }
+    },
   );
 
   // Get user accounts with pagination and sorting
@@ -120,9 +104,7 @@ export default async function accountsService(
     } as RouteShorthandOptions,
     async (request, reply) => {
       // Validate and sanitize pagination and sorting parameters
-      const { limit, skip, sortBy, order } = validatePaginationAndSorting(
-        request.query
-      );
+      const { limit, skip, sortBy, order } = validatePaginationAndSorting(request.query);
       // Caching request to reduce database queries
       const cacheKey = `user_accounts_${request.user.email}_${limit}_${skip}_${sortBy}_${order}`;
       const cachedData = fastify.cache.get(cacheKey);
@@ -149,11 +131,9 @@ export default async function accountsService(
         }
         return reply.send({ success: false, message: 'User not found' });
       } catch (error) {
-        reply
-          .status(500)
-          .send({ success: false, message: 'Internal server error' });
+        reply.status(500).send({ success: false, message: 'Internal server error' });
       }
-    }
+    },
   );
 
   // Get account transactions with pagination and sorting
@@ -168,9 +148,7 @@ export default async function accountsService(
     } as RouteShorthandOptions,
     async (request, reply) => {
       // Validate and sanitize pagination and sorting parameters
-      const { limit, skip, sortBy, order } = validatePaginationAndSorting(
-        request.query
-      );
+      const { limit, skip, sortBy, order } = validatePaginationAndSorting(request.query);
       try {
         const { accountId } = request.params;
         // Get all account transactions from the database, either the account is the sender or the receiver
@@ -184,10 +162,8 @@ export default async function accountsService(
         });
         reply.send({ success: true, data: transactions });
       } catch (error) {
-        reply
-          .status(500)
-          .send({ success: false, message: 'Internal server error' });
+        reply.status(500).send({ success: false, message: 'Internal server error' });
       }
-    }
+    },
   );
 }

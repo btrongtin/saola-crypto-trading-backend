@@ -6,15 +6,10 @@ import { DEFAULT_PAGE_SIZE } from '../../constant';
  * @returns {{ limit: number, skip: number, sortBy: string, order: 'asc' | 'desc' }} - An object containing sanitized limit, skip, sortBy, and order.
  */
 const validateAndSanitizeQueryParams = (
-  query: Record<string, any>
+  query: Record<string, any>,
 ): { limit: number; skip: number; sortBy: string; order: 'asc' | 'desc' } => {
   // Destructure query parameters with default values
-  let {
-    limit = DEFAULT_PAGE_SIZE,
-    skip = 0,
-    sortBy = 'createdAt',
-    order = 'desc',
-  } = query;
+  let { limit = DEFAULT_PAGE_SIZE, skip = 0, sortBy = 'createdAt', order = 'desc' } = query;
 
   // Ensure limit and skip are non-negative integers
   limit = Math.max(parseInt(limit, 10), 0);
