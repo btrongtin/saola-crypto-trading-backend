@@ -9,6 +9,8 @@
   },
   "scripts": {
     "start": "tsx watch src/app.ts",
+    "prisma:generate": "prisma generate",
+    "prisma:push": "prisma db push",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "prettier": "prettier --check ."

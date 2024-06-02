@@ -25,8 +25,8 @@ This repository contains two backend services: Account Manager and Transaction M
 
 **Transactions**
 
-- Transactions are processed by a simulated API. I use Prisma transactions to ensure data consistency.
-- Users can send money from one account to another.
+- Transactions are processed by a simulated API. I use Prisma transactions to ensure data consistency. Make sure to rollback transaction when errors occur.
+- Users can send money from one account to another, money will be converted to the recipient currency.
 - Users can withdraw money from an account.
 
 **Data validation**
@@ -39,16 +39,17 @@ This repository contains two backend services: Account Manager and Transaction M
 ## Tech Stack
 
 - Backend
-    - Node.js: The core runtime environment powering the backend, known for its performance and scalability.
-    - Fastify: A high-performance web framework for Node.js, chosen for its speed and low overhead.
-    - Firebase: Used for authentication.
-    - Prisma: An ORM (Object-Relational Mapping) tool for efficient database management and querying.
-    - TypeScript: Enhances JavaScript with static typing, improving code quality and maintainability.
+  - Node.js: The core runtime environment powering the backend, known for its performance and scalability.
+  - Fastify: A high-performance web framework for Node.js, chosen for its speed and low overhead.
+  - Firebase: Used for authentication.
+  - Prisma: An ORM (Object-Relational Mapping) tool for efficient database management and querying.
+  - TypeScript: Enhances JavaScript with static typing, improving code quality and maintainability.
 - Development tools
-    - Docker: The application is containerized using Docker, ensuring consistent environments across development, testing, and production.
-    - TSX: Used to run TypeScript files directly, supporting hot-reloading for a smoother development experience.
+  - Docker: The application is containerized using Docker, ensuring consistent environments across development, testing, and production.
+  - TSX: Used to run TypeScript files directly, supporting hot-reloading for a smoother development experience.
 - Documentation
-    - Swagger: The app uses Swagger for API documentation, providing a clear and interactive interface for developers to understand and interact with the API endpoints.
+  - Swagger: The app uses Swagger for API documentation, providing a clear and interactive interface for developers to understand and interact with the API endpoints.
+
 ## Architecture
 
 The application consists of two main services:
@@ -58,105 +59,121 @@ The application consists of two main services:
    - Manages user registration, login, and account information.
    - Routes:
      - [POST] `/api/accounts/register`: Register a new user with accounts.
-     - [POST] `/api/accounts/login`: Login a user, after login, client will receive an `access token` and a `refresh token`.
+     - [POST] `/api/accounts/login`: Login a user, after login, client will receive an `access token`.
      - [GET] `/api/accounts`: Get all accounts of the logged-in user (requires authentication), client can pass the `skip` and `limit` query for pagination.
      - [GET] `/api/accounts/:accountId/transactions`: Get transactions for a specific account (requires authentication), client can pass the `skip` and `limit` query for pagination.
 
-***Note: see [API Documentation](#api-documentation) for details API documentation***
+**_Note: see [API Documentation](#api-documentation) for details API documentation_**
 
 2. **Transaction Manager Service**:
+
    - Manages sending and withdrawing funds between accounts.
    - Routes:
+
      - [POST] `/api/transactions/send`: Send funds to another account (requires authentication).
 
      ```mermaid
-      sequenceDiagram
-      autonumber
-      participant Client
-      participant FastifyServer
-      participant Database
-      participant SimulatedAPI
+        sequenceDiagram
+        autonumber
+        participant Client
+        participant FastifyServer
+        participant Database
+        participant SimulatedAPI
 
-      Client->>FastifyServer: POST /send
-      FastifyServer->>Database: Retrieve user with email and accounts
-      Database-->>FastifyServer: User and accounts data
+        Client->>FastifyServer: POST /send
+        FastifyServer->>Database: Retrieve user with email and accounts
+        Database-->>FastifyServer: User and accounts data
 
-      alt Account not found or does not belong to user
-          FastifyServer-->>Client: 401 Cannot perform this action
-      else Account found
-          alt Insufficient balance
-              FastifyServer-->>Client: 400 Insufficient balance
-          else Sufficient balance
-              FastifyServer->>Database: Create transaction with status 'pending'
-              Database-->>FastifyServer: Transaction data
+        alt Account ID is the same as To Address
+            FastifyServer-->>Client: 400 Cannot send to yourself
+        else Account ID is different from To Address
+            FastifyServer->>Database: Retrieve recipient account with id: toAddress
+            Database-->>FastifyServer: Recipient account data
 
-              FastifyServer->>SimulatedAPI: Process transaction
-              SimulatedAPI-->>FastifyServer: Transaction processed
+            alt Recipient account not found
+                FastifyServer-->>Client: 404 Recipient account not found
+            else Recipient account found
+                FastifyServer->>FastifyServer: Convert amount to recipient's currency
 
-              FastifyServer->>Database: Begin transaction
-              par Update sender account balance
-                  FastifyServer->>Database: Decrement sender balance
-              and Update receiver account balance
-                  FastifyServer->>Database: Increment receiver balance
-              and Update transaction status
-                  FastifyServer->>Database: Update transaction to 'completed'
-              end
-              Database-->>FastifyServer: Transaction updates
+                alt Sender account not found or does not belong to user
+                    FastifyServer-->>Client: 401 Cannot perform this action
+                else Sender account found
+                    alt Insufficient balance
+                        FastifyServer-->>Client: 400 Insufficient balance
+                    else Sufficient balance
+                        FastifyServer->>Database: Create transaction with status 'pending'
+                        Database-->>FastifyServer: Transaction data
 
-              FastifyServer-->>Client: 200 Transaction completed successfully
-          end
-      end
+                        FastifyServer->>SimulatedAPI: Process transaction
+                        SimulatedAPI-->>FastifyServer: Transaction processed
 
-      alt Error occurs
-          FastifyServer->>Database: Update transaction to 'cancelled'
-          Database-->>FastifyServer: Transaction status updated
-          FastifyServer-->>Client: 500 Internal server error
-      end
+                        FastifyServer->>Database: Begin transaction
+                        par Update sender account balance
+                            FastifyServer->>Database: Decrement sender balance
+                        and Update receiver account balance
+                            FastifyServer->>Database: Increment receiver balance
+                        and Update transaction status
+                            FastifyServer->>Database: Update transaction to 'completed'
+                        end
+                        Database-->>FastifyServer: Transaction updates
+
+                        FastifyServer-->>Client: 200 Transaction completed successfully
+                    end
+                end
+            end
+        end
+
+        alt Error occurs
+            FastifyServer->>Database: Update transaction to 'cancelled'
+            Database-->>FastifyServer: Transaction status updated
+            FastifyServer-->>Client: 500 Internal server error
+        end
+
      ```
+
      - [POST] `/api/transactions/withdraw`: Withdraw funds from an account (requires authentication).
-     
+
      ```mermaid
-      sequenceDiagram
-          autonumber
-          participant Client
-          participant FastifyServer
-          participant Database
-          participant SimulatedAPI
+        sequenceDiagram
+        autonumber
+        participant Client
+        participant FastifyServer
+        participant Database
+        participant SimulatedAPI
 
-          Client->>FastifyServer: POST /withdraw
-          FastifyServer->>Database: Retrieve user with email and accounts
-          Database-->>FastifyServer: User and accounts data
+        Client->>FastifyServer: POST /withdraw
+        FastifyServer->>Database: Retrieve user with email and accounts
+        Database-->>FastifyServer: User and accounts data
 
-          alt Account not found or does not belong to user
-              FastifyServer-->>Client: 401 Cannot perform this action
-          else Account found
-              alt Insufficient balance
-                  FastifyServer-->>Client: 400 Insufficient balance
-              else Sufficient balance
-                  FastifyServer->>Database: Create transaction with status 'pending'
-                  Database-->>FastifyServer: Transaction data
+        alt Account not found or does not belong to user
+            FastifyServer-->>Client: 403 Cannot perform this action
+        else Account found
+            alt Insufficient balance
+                FastifyServer-->>Client: 400 Insufficient balance
+            else Sufficient balance
+                FastifyServer->>Database: Create transaction with status 'PENDING'
+                Database-->>FastifyServer: Transaction data
 
-                  FastifyServer->>SimulatedAPI: Process transaction
-                  SimulatedAPI-->>FastifyServer: Transaction processed
+                FastifyServer->>SimulatedAPI: Process transaction
+                SimulatedAPI-->>FastifyServer: Transaction processed
 
-                  FastifyServer->>Database: Begin transaction
-                  par Update sender account balance
-                      FastifyServer->>Database: Decrement sender balance
-                  and Update transaction status
-                      FastifyServer->>Database: Update transaction to 'completed'
-                  end
-                  Database-->>FastifyServer: Transaction updates
+                FastifyServer->>Database: Begin transaction
+                par Update sender account balance
+                    FastifyServer->>Database: Decrement sender balance
+                and Update transaction status
+                    FastifyServer->>Database: Update transaction to 'COMPLETED'
+                end
+                Database-->>FastifyServer: Transaction updates
 
-                  FastifyServer-->>Client: 200 Transaction completed successfully
-              end
-          end
+                FastifyServer-->>Client: 200 Transaction completed successfully
+            end
+        end
 
-          alt Error occurs
-              FastifyServer->>Database: Update transaction to 'cancelled'
-              Database-->>FastifyServer: Transaction status updated
-              FastifyServer-->>Client: 500 Internal server error
-          end
-
+        alt Error occurs
+            FastifyServer->>Database: Update transaction to 'CANCELLED'
+            Database-->>FastifyServer: Transaction status updated
+            FastifyServer-->>Client: 500 Internal server error
+        end
      ```
 
 ## Running the application
