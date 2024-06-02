@@ -9,7 +9,6 @@ import { ERROR_CODE } from '../constant';
 import rollbackTransaction from './utils/rollbackTransaction';
 import { TransactionStatus } from '@prisma/client';
 import exchangeMoney from './utils/exchangeMoney';
-import isValidCurrency from './utils/isValidCurrency';
 
 export default async function transactionsService(fastify: FastifyInstance, opts: FastifyPluginOptions) {
   // Send transaction route
@@ -48,9 +47,9 @@ export default async function transactionsService(fastify: FastifyInstance, opts
           // Create a new transaction with status 'pending'
           transaction = await fastify.prisma.transaction.create({
             data: {
-              amount: convertedAmount,
+              amount,
               toAddress,
-              currency: recipientAccount.currency,
+              currency: senderAccount.currency,
               status: TransactionStatus.PENDING,
               type: 'send',
               accountId,
@@ -64,7 +63,7 @@ export default async function transactionsService(fastify: FastifyInstance, opts
               where: { id: accountId },
               data: {
                 balance: {
-                  decrement: convertedAmount,
+                  decrement: amount,
                 },
               },
             }),
