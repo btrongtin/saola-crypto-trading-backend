@@ -8,6 +8,7 @@ import { RouteShorthandOptions } from 'fastify/types/route';
 import { ILoginRequestBody, IRegisterRequestBody } from './types/account.types';
 import ApiError, { handleApiError } from '../apiHandler/ApiError';
 import rollbackCreatedUser from './utils/rollbackCreatedUser';
+import { AccountType, Currency } from '@prisma/client';
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -29,8 +30,9 @@ export default async function accountsService(fastify: FastifyInstance, opts: Fa
         // Prepare accounts list
         const accountsList = accounts
           ? accounts.map((account) => ({
-              type: account.type,
-              balance: account.balance ?? 0,
+              type: account.type || AccountType.DEBIT,
+              balance: account.balance || 0,
+              currency: account.currency || Currency.USD,
             }))
           : [];
         // Create user in Firebase
@@ -145,10 +147,16 @@ export default async function accountsService(fastify: FastifyInstance, opts: Fa
       schema: getAccountTransactions,
     } as RouteShorthandOptions,
     async (request, reply) => {
-      // Validate and sanitize pagination and sorting parameters
-      const { limit, skip, sortBy, order } = validatePaginationAndSorting(request.query);
       try {
+        // Validate and sanitize pagination and sorting parameters
+        const { limit, skip, sortBy, order } = validatePaginationAndSorting(request.query);
         const { accountId } = request.params;
+        const requestedAccount = await fastify.prisma.account.findUnique({
+          where: { id: accountId },
+        });
+        if (!requestedAccount) throw new ApiError(ERROR_CODE.NOT_FOUND, 'Account not found.');
+        if (requestedAccount.userId !== request.user.id)
+          throw new ApiError(ERROR_CODE.FORBIDDEN, 'You are not allowed to retrieve this account data.');
         // Get all account transactions from the database, either the account is the sender or the receiver
         const transactions = await fastify.prisma.transaction.findMany({
           where: {

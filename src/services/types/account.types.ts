@@ -7,15 +7,13 @@ export interface IAccount {
   id: string;
   type: string;
   balance: number;
+  currency: 'USD' | 'VND';
 }
 
 export interface IRegisterRequestBody {
   email: string;
   password: string;
-  accounts: Array<{
-    type: string;
-    balance: number;
-  }>;
+  accounts: IAccount[];
 }
 
 export interface ILoginRequestBody {

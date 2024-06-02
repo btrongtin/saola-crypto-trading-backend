@@ -12,8 +12,9 @@ const registerUser: FastifySchema = {
         items: {
           type: 'object',
           properties: {
-            type: { type: 'string' },
+            type: { type: 'string', default: 'DEBIT' },
             balance: { type: 'number', default: 0 },
+            currency: { type: 'string', default: 'USD' },
           },
           required: ['type'],
         },
@@ -75,6 +76,7 @@ const getUserAccounts: FastifySchema = {
               id: { type: 'string' },
               type: { type: 'string' },
               balance: { type: 'number' },
+              currency: { type: 'string' },
               userId: { type: 'string' },
             },
           },
@@ -112,7 +114,7 @@ const getAccountTransactions: FastifySchema = {
             properties: {
               id: { type: 'string' },
               amount: { type: 'number' },
-              timestamp: { type: 'string', format: 'date-time' },
+              createdAt: { type: 'string', format: 'date-time' },
               toAddress: { type: 'string' },
               currency: { type: 'string' },
               status: { type: 'string' },

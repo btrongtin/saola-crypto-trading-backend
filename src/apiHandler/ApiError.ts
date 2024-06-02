@@ -26,7 +26,7 @@ export const handleApiError = (reply: FastifyReply, error: any) => {
   } else {
     return reply.status(ERROR_CODE.INTERNAL_SERVER_ERROR).send({
       success: false,
-      message: 'Internal server error.',
+      message: error.message || 'Internal server error.',
     });
   }
 };

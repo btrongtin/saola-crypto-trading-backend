@@ -10,6 +10,7 @@ declare module 'fastify' {
     user?: {
       email: string;
       uid: string;
+      id: string;
     };
   }
 }
@@ -28,8 +29,13 @@ const authPlugin: FastifyPluginAsync = async (fastify, opts) => {
       try {
         // Verify the token using Firebase authentication
         const firebaseUser = await firebase.auth().verifyIdToken(token);
+        const internalUser = await fastify.prisma.user.findUnique({
+          where: {
+            email: firebaseUser.email,
+          },
+        });
         // Attach the verified user information to the request object
-        request.user = { email: firebaseUser.email, uid: firebaseUser.uid };
+        request.user = { email: firebaseUser.email, uid: firebaseUser.uid, id: internalUser.id };
       } catch (firebaseError) {
         // Handle Firebase errors
         if (firebaseError.codePrefix === 'auth') {
