@@ -6,7 +6,8 @@
 export default function processTransaction<T>(transaction: T): Promise<T> {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
-      resolve(transaction);
+      reject('REJECT')
+      // resolve(transaction);
     }, 3000); // 3 seconds
   });
 }

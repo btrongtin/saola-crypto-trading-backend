@@ -48,7 +48,6 @@ const loginUser: FastifySchema = {
       properties: {
         success: { type: 'boolean' },
         accessToken: { type: 'string' },
-        refreshToken: { type: 'string' },
       },
     },
   },
