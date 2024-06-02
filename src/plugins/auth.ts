@@ -1,11 +1,16 @@
 import { FastifyPluginAsync, FastifyReply, FastifyRequest } from 'fastify';
 import fastifyPlugin from 'fastify-plugin';
 import firebase from '../firebase/index';
+import { ERROR_CODE } from '../constant';
+import ApiError, { handleApiError } from '../apiHandler/ApiError';
 
 // Define the shape of the request with user information
 declare module 'fastify' {
   interface FastifyRequest {
-    user?: firebase.auth.DecodedIdToken;
+    user?: {
+      email: string;
+      uid: string;
+    };
   }
 }
 
@@ -13,22 +18,26 @@ const authPlugin: FastifyPluginAsync = async (fastify, opts) => {
   // Decorate the Fastify instance with the `authenticate` method
   fastify.decorate('authenticate', async (request: FastifyRequest, reply: FastifyReply) => {
     const authHeader = request.headers.authorization;
-    // Check if the authorization header is present and starts with 'Bearer '
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return reply.status(401).send({ success: false, message: 'No token provided.' });
-    }
-
-    // Extract the token from the authorization header
-    const token = authHeader.split(' ')[1];
-
     try {
-      // Verify the token using Firebase authentication
-      const firebaseUser = await firebase.auth().verifyIdToken(token);
-      // Attach the verified user information to the request object
-      request.user = firebaseUser;
+      // Check if the authorization header is present and starts with 'Bearer '
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        throw new ApiError(ERROR_CODE.UNAUTHORIZED, 'No token provided.');
+      }
+      // Extract the token from the authorization header
+      const token = authHeader.split(' ')[1];
+      try {
+        // Verify the token using Firebase authentication
+        const firebaseUser = await firebase.auth().verifyIdToken(token);
+        // Attach the verified user information to the request object
+        request.user = { email: firebaseUser.email, uid: firebaseUser.uid };
+      } catch (firebaseError) {
+        // Handle Firebase errors
+        if (firebaseError.codePrefix === 'auth') {
+          throw new ApiError(ERROR_CODE.UNAUTHORIZED, 'Invalid or expired token.');
+        }
+      }
     } catch (err) {
-      // Handle errors in token verification
-      reply.status(401).send({ success: false, message: 'Invalid or expired token.' });
+      handleApiError(reply, err);
     }
   });
 };

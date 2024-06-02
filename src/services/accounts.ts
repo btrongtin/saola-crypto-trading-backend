@@ -2,10 +2,12 @@ import axios from 'axios';
 import firebase from '../firebase/index';
 import { getAccountTransactions, getUserAccounts, loginUser, registerUser } from './schemas/accounts';
 import validatePaginationAndSorting from './utils/validatePaginationAndSorting';
-import { CACHE_TTL } from '../constant';
+import { CACHE_TTL, ERROR_CODE, ERR_BAD_REQUEST, GENERAL_CODE } from '../constant';
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { RouteShorthandOptions } from 'fastify/types/route';
 import { ILoginRequestBody, IRegisterRequestBody } from './types/account.types';
+import ApiError, { handleApiError } from '../apiHandler/ApiError';
+import rollbackCreatedUser from './utils/rollbackCreatedUser';
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -24,7 +26,6 @@ export default async function accountsService(fastify: FastifyInstance, opts: Fa
       try {
         // Destructure request body to extract user details
         const { email, password, accounts } = request.body;
-
         // Prepare accounts list
         const accountsList = accounts
           ? accounts.map((account) => ({
@@ -32,10 +33,8 @@ export default async function accountsService(fastify: FastifyInstance, opts: Fa
               balance: account.balance ?? 0,
             }))
           : [];
-
         // Create user in Firebase
         user = await firebase.auth().createUser({ email, password });
-
         // Create user in Prisma
         await fastify.prisma.user.create({
           data: {
@@ -45,20 +44,17 @@ export default async function accountsService(fastify: FastifyInstance, opts: Fa
             },
           },
         });
-
-        reply.status(201).send({ success: true, message: 'Register successfully.' });
+        reply.status(GENERAL_CODE.CREATED).send({ success: true, message: 'Register successfully.' });
       } catch (error) {
         if (user) {
-          try {
-            // Remove user from Firebase if any error occurs when creating user with Prisma
-            await firebase.auth().deleteUser(user.uid);
-          } catch (deleteError) {}
+          // Remove user from Firebase if any error occurs when creating user with Prisma
+          await rollbackCreatedUser(user.uid);
         }
         // Error code P2002 from Prisma: Duplicate account type
         if ((error as any).code === 'P2002') {
-          return reply.status(400).send({ success: false, message: 'Duplicate account type.' });
+          return handleApiError(reply, new ApiError(ERROR_CODE.CONFLICT, 'Duplicate account type.'));
         }
-        reply.status(400).send({ success: false, message: (error as Error).message });
+        handleApiError(reply, error);
       }
     },
   );
@@ -81,14 +77,15 @@ export default async function accountsService(fastify: FastifyInstance, opts: Fa
             returnSecureToken: true,
           },
         );
-        // Get access token and refresh token to send back to client
-        const { idToken, refreshToken } = response.data;
-        reply.send({ success: true, accessToken: idToken, refreshToken });
+        // Get access token to send back to client
+        const { idToken } = response.data;
+        reply.send({ success: true, accessToken: idToken });
       } catch (error) {
-        reply.status(400).send({
-          success: false,
-          message: (error as any).response?.data?.error?.message || (error as Error).message,
-        });
+        // Error from google authentication
+        if (error.code === ERR_BAD_REQUEST) {
+          return handleApiError(reply, new ApiError(ERROR_CODE.UNAUTHORIZED, 'Invalid email or password.'));
+        }
+        handleApiError(reply, error);
       }
     },
   );
@@ -128,10 +125,11 @@ export default async function accountsService(fastify: FastifyInstance, opts: Fa
           // Set data in cache and send response
           fastify.cache.set(cacheKey, user.accounts, CACHE_TTL);
           return reply.send({ success: true, data: user.accounts });
+        } else {
+          throw new ApiError(ERROR_CODE.NOT_FOUND, 'User not found');
         }
-        return reply.send({ success: false, message: 'User not found' });
       } catch (error) {
-        reply.status(500).send({ success: false, message: 'Internal server error' });
+        handleApiError(reply, error);
       }
     },
   );
@@ -162,7 +160,7 @@ export default async function accountsService(fastify: FastifyInstance, opts: Fa
         });
         reply.send({ success: true, data: transactions });
       } catch (error) {
-        reply.status(500).send({ success: false, message: 'Internal server error' });
+        handleApiError(reply, error);
       }
     },
   );

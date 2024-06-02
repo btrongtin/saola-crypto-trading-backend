@@ -79,7 +79,7 @@ components:
           example: 6651d51debb976558724e1e7
         currency:
           type: string
-          description: The currency of the transaction
+          description: The currency of the sender account
           example: USD
         status:
           type: string
@@ -205,12 +205,9 @@ paths:
                     type: boolean
                   accessToken:
                     type: string
-                  refreshToken:
-                    type: string
                 example:
                   success: true
                   accessToken: eyJhbGciOiJSUzI1NiIsImtpZCI6IjNjOTNjMWEyNGNhZjgyN2I4ZGRlOWY4MmQyMzE1MzY1MDg4YWU2MTIiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vc2FvbGEtY3J5cHRvLXRyYWRpbmctYXBwIiwiYXVkIjoic2FvbGEtY3J5cHRvLXRyYWRpbmctYXBwIiwiYXV0aF90aW1lIjoxNzE2NzE1ODYyLCJ1c2VyX2lkIjoiaTJkMGU1YXFPYWM0aDdpdkhzMzRaYUFnZWtvMiIsInN1YiI6ImkyZDBlNWFxT2FjNGg3aXZIczM0WmFBZ2VrbzIiLCJpYXQiOjE3MTY3MTU4NjIsImV4cCI6MTcxNjcxOTQ2MiwiZW1haWwiOiJidHJvbmd0aW44OTFAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7ImVtYWlsIjpbImJ0cm9uZ3Rpbjg5MUBnbWFpbC5jb20iXX0sInNpZ25faW5fcHJvdmlkZXIiOiJwYXNzd29yZCJ9fQ.KUTF_pCN6jHs8f6_s5aEJxXI79Pkt7q3CjiFSeBhhUpcgDYU3L7rdsGc5MdGirF3jlFeI9KFaBg6xriCTiOLEMQWi9X1SgAwmKH48bSVZgIeyS09eZdzqk7Y-2i40aRODtvWMHXxwIe7KWeTWB02YWpCWhuAe01YzcLsRal_PsPBQN_DCX4egFJ4nMTcZ2exRzDHkxDR1SEWPXZHo1nkmCtdQXOOYh31tPG697slni62GXl0FVLKhdz98dRAWvWGp4-CyA1UbAZwmEy64nYf16l75bNez3gnPU0di88KsgUlwRdbQiMf9edfancYdRVtvSM9PVQu_Hdmmo_fr9Nvow
-                  refreshToken: AMf-vBwszj3ybRGvjN2OftrQLVk41F8h980rj2n14aYneD-7tmjAi2L-WnXHmitqnvttt2uLeermyFevHKzWd1GF2M7v-2KexHfEvoS8nlgVHVPP9uJBuqHLhX_10DI3m-xu1IqdFUh9X_-kaFiEVr2Oi6cLuYKRwNyPcw818On4NYz8WXX61I35URcXq5VwZ4C6fpqz9V33GYSrne-FuTys2yG-fkzH5cnhs6sHBFKbIHcMDm8NAuI
         '400':
           description: Bad request
           content:
@@ -423,13 +420,10 @@ paths:
                   type: string
                 accountId:
                   type: string
-                currency:
-                  type: string
               example:
                 amount: 100
                 toAddress: 6651d51debb976558724e1e7
                 accountId: 6651d51debb976558724e1e6
-                currency: USD
       responses:
         '200':
           description: Transaction created
@@ -505,12 +499,9 @@ paths:
                   type: number
                 accountId:
                   type: string
-                currency:
-                  type: string
               example:
                 amount: 100
                 accountId: 6651d51debb976558724e1e6
-                currency: USD
       responses:
         '200':
           description: Transaction created

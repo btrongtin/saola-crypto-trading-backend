@@ -9,6 +9,7 @@ const validateAndSanitizeQueryParams = (
   query: Record<string, any>,
 ): { limit: number; skip: number; sortBy: string; order: 'asc' | 'desc' } => {
   // Destructure query parameters with default values
+  // eslint-disable-next-line prefer-const
   let { limit = DEFAULT_PAGE_SIZE, skip = 0, sortBy = 'createdAt', order = 'desc' } = query;
 
   // Ensure limit and skip are non-negative integers

@@ -8,9 +8,8 @@ const sendTransaction: FastifySchema = {
       amount: { type: 'number', minimum: 0.01 },
       toAddress: { type: 'string' },
       accountId: { type: 'string' },
-      currency: { type: 'string' },
     },
-    required: ['amount', 'toAddress', 'accountId', 'currency'], // Required fields for sending a transaction
+    required: ['amount', 'toAddress', 'accountId'], // Required fields for sending a transaction
   },
   headers: {
     type: 'object',
@@ -37,9 +36,8 @@ const withdrawTransaction: FastifySchema = {
     properties: {
       amount: { type: 'number', minimum: 0.01 }, // Amount to withdraw, must be at least 0.01
       accountId: { type: 'string' }, // Account ID from which to withdraw
-      currency: { type: 'string' },
     },
-    required: ['amount', 'accountId', 'currency'], // Required fields for withdrawing a transaction
+    required: ['amount', 'accountId'], // Required fields for withdrawing a transaction
   },
   headers: {
     type: 'object',
