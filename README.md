@@ -8,6 +8,7 @@ This repository contains two backend services: Account Manager and Transaction M
 - [Tech Stack](#tech-stack)
 - [Architecture](#architecture)
 - [Running the Application](#running-the-application)
+- [Common Issues](#common-issues)
 - [API Documentation](#api-documentation)
 
 ## Key Features
@@ -195,6 +196,14 @@ Navigate to the root directory of the cloned repository and run the following co
 
 ```bash
 docker-compose up
+```
+
+### Common Issues
+
+- **Conflict Prisma client build**: When the `schema.prisma` file is updated, the old Docker build might not use the latest Prisma client. To fix this, remove the old build by running the following commands
+```bash
+docker-compose down --rmi all -v
+docker-compose up --build
 ```
 
 ## API documentation
