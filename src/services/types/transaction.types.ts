@@ -9,3 +9,8 @@ export interface IWithdrawTransactionRequestBody {
   amount: number;
   accountId: string;
 }
+
+export enum TransactionType {
+  SEND = 'send',
+  WITHDRAW = 'withdraw',
+}

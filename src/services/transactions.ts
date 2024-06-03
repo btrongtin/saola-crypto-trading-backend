@@ -2,7 +2,11 @@ import processTransaction from '../coreApis/processTransaction';
 import { sendTransaction, withdrawTransaction } from './schemas/transactions';
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { RouteShorthandOptions } from 'fastify/types/route';
-import { ISendTransactionRequestBody, IWithdrawTransactionRequestBody } from './types/transaction.types';
+import {
+  ISendTransactionRequestBody,
+  IWithdrawTransactionRequestBody,
+  TransactionType,
+} from './types/transaction.types';
 import { IAccount } from './types/account.types';
 import ApiError, { handleApiError } from '../apiHandler/ApiError';
 import { ERROR_CODE } from '../constant';
@@ -35,11 +39,11 @@ export default async function transactionsService(fastify: FastifyInstance, opts
           where: { email: request.user.email },
           include: { accounts: true },
         });
-        // Check if the sender account is belonging to the logged-in user
+        // The sender account must exist and belong to the logged-in user
         const senderAccount = user?.accounts.find((account: IAccount) => account.id === accountId);
-        // Convert the amount to the recipient's currency
+        // Convert the amount to the recipient's currency before processing
         const convertedAmount = exchangeMoney(senderAccount.currency, recipientAccount.currency, amount);
-        // If the account is found, check for sufficient balance
+        // If the sender account is found, check for sufficient balance
         if (senderAccount) {
           if (senderAccount.balance < amount) {
             throw new ApiError(ERROR_CODE.BAD_REQUEST, 'Insufficient balance.');
@@ -51,11 +55,11 @@ export default async function transactionsService(fastify: FastifyInstance, opts
               toAddress,
               currency: senderAccount.currency,
               status: TransactionStatus.PENDING,
-              type: 'send',
+              type: TransactionType.SEND,
               accountId,
             },
           });
-          // Process the transaction
+          // Process the transaction via provided core API
           await processTransaction(transaction);
           // Use Prisma transaction to update the account balances
           await fastify.prisma.$transaction([
@@ -116,7 +120,7 @@ export default async function transactionsService(fastify: FastifyInstance, opts
           where: { email: request.user.email },
           include: { accounts: true },
         });
-        // Check if the requested account is belonging to the logged-in user
+        // The requested account must exist and belong to the logged-in user
         const senderAccount = user?.accounts.find((account: IAccount) => account.id === accountId);
         // If the account is found, check for sufficient balance
         if (senderAccount) {
@@ -130,7 +134,7 @@ export default async function transactionsService(fastify: FastifyInstance, opts
               amount,
               currency: senderAccount.currency,
               status: TransactionStatus.PENDING,
-              type: 'withdraw',
+              type: TransactionType.WITHDRAW,
               accountId,
             },
           });
