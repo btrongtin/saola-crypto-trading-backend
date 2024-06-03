@@ -2,7 +2,7 @@ import axios from 'axios';
 import firebase from '../firebase/index';
 import { getAccountTransactions, getUserAccounts, loginUser, registerUser } from './schemas/accounts';
 import validatePaginationAndSorting from './utils/validatePaginationAndSorting';
-import { CACHE_TTL, ERROR_CODE, ERR_BAD_REQUEST, GENERAL_CODE } from '../constant';
+import { CACHE_TTL, DUPLICATE_CONSTRAINT, ERROR_CODE, ERR_BAD_REQUEST, GENERAL_CODE } from '../constant';
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { RouteShorthandOptions } from 'fastify/types/route';
 import { ILoginRequestBody, IRegisterRequestBody } from './types/account.types';
@@ -53,7 +53,7 @@ export default async function accountsService(fastify: FastifyInstance, opts: Fa
           await rollbackCreatedUser(user.uid);
         }
         // Error code P2002 from Prisma: Duplicate account type
-        if ((error as any).code === 'P2002') {
+        if ((error as any).code === DUPLICATE_CONSTRAINT) {
           return handleApiError(reply, new ApiError(ERROR_CODE.CONFLICT, 'Duplicate account type.'));
         }
         handleApiError(reply, error);
@@ -112,7 +112,7 @@ export default async function accountsService(fastify: FastifyInstance, opts: Fa
         return reply.send({ success: true, data: cachedData });
       }
       try {
-        // Retrieve the logged-in user from the database
+        // Retrieve the accounts of the logged-in user
         const user = await fastify.prisma.user.findUnique({
           where: { email: request.user.email },
           include: {
@@ -151,6 +151,7 @@ export default async function accountsService(fastify: FastifyInstance, opts: Fa
         // Validate and sanitize pagination and sorting parameters
         const { limit, skip, sortBy, order } = validatePaginationAndSorting(request.query);
         const { accountId } = request.params;
+        // Validation: User can only retrieve transactions from their own accounts
         const requestedAccount = await fastify.prisma.account.findUnique({
           where: { id: accountId },
         });
